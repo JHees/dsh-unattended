@@ -1,0 +1,6 @@
+{
+  "meta": {
+    "title": "Unattended (Auto review)",
+    "description": "In Auto review mode, the reviewer still decides every call: allowed calls run, denied calls are rejected directly, and no human approval prompt appears."
+  }
+}

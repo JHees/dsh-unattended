@@ -1,0 +1,62 @@
+{
+  "name": "dsh-unattended",
+  "version": "0.1.0",
+  "description": "Unattended mode for the DSH Auto review preset: reviewer denials become final with no human approval prompt, while allowed calls still run",
+  "type": "module",
+  "license": "MIT",
+  "author": "JHees",
+  "homepage": "https://github.com/JHees/dsh-unattended#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/JHees/dsh-unattended.git"
+  },
+  "bugs": {
+    "url": "https://github.com/JHees/dsh-unattended/issues"
+  },
+  "main": "index.js",
+  "exports": {
+    ".": "./index.js",
+    "./client": "./client.js",
+    "./locale/*.json": "./locale/*.json",
+    "./icon": "./icon.svg"
+  },
+  "files": [
+    "index.js",
+    "client.js",
+    "cordis.patch.yml",
+    "locale/*.json",
+    "icon.svg",
+    "test.mjs",
+    "test-client.mjs",
+    "README.md",
+    "LICENSE"
+  ],
+  "keywords": [
+    "dsh",
+    "dsh-plugin",
+    "deepseek-harness",
+    "cordis-plugin",
+    "auto-review",
+    "unattended",
+    "approval",
+    "permission"
+  ],
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "test": "node test.mjs && node test-client.mjs"
+  },
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    },
+    "client": {
+      "platform": "web",
+      "immediately": true,
+      "inject": [
+        "@deepseek-ai/dsh-client-ui-conversation"
+      ]
+    }
+  }
+}

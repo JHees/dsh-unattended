@@ -1,0 +1,3 @@
+- insert:
+    - id: unattended
+      name: 'dsh-unattended'
