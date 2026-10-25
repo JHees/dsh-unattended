@@ -62,6 +62,14 @@ dsh plugin --profile web add github:JHees/dsh-unattended
    - reviewer `deny` 且策略为 `never` → 返回最终拒绝（`AUTO_REVIEW_DENIED`），**不发起审批请求**；
    - 只有策略为 `ask` 时，拒绝才会弹面板。
 3. 插件注册一个 `unattended` 会话投影（布尔）供按钮显示，状态本身不额外持久化。
+4. 插件额外注册一条 runtime context（`unattended:mode`，紧跟官方 `approval:policy`），只在
+   「自动审查 + `never`」时出现，把通用文案没说清的事讲明：
+
+   ```
+   Unattended mode is on: the Auto review reviewer still decides every call. A reviewer denial is final — no human approval will be requested. Do not repeat the exact denied call or request sandbox escalation; adapt the approach, or stop and report the blocker.
+   ```
+
+   关闭无人值守后该条目渲染为空，下一次运行时快照自然取代旧文字；官方 `never` 文案本身不变。
 
 ## 已知限制
 
@@ -83,9 +91,11 @@ dsh plugin --profile web add github:JHees/dsh-unattended
 ## 开发
 
 ```sh
-node test.mjs          # 主机逻辑：投影折叠、命令开/关与守卫
+node test.mjs          # 主机逻辑：投影折叠、命令开/关与守卫、模型侧 context
 node test-client.mjs   # 客户端接线：槽位注册、按钮渲染与命令调用
 ```
+
+改动 Host 侧代码（`index.js`）后需要重启 DSH 进程才生效；只改 `client.js` 刷新页面即可。
 
 仓库结构：
 

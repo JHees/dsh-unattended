@@ -9,11 +9,19 @@
  *
  * 状态直接来自会话日志里的 `approval/policy` 事件（审批服务自己写入），不需要
  * 额外持久化；`unattended` 投影把策略折叠成布尔视图，交给客户端按钮显示。
+ *
+ * 另外向模型补一条专属的 runtime context：官方 `never` 文案是通用的（讲沙箱提权，
+ * 而 auto 预设本来就无沙箱），这里在无人值守开启时明确说清「审查仍逐次进行、
+ * 拒绝即最终拒绝、不要等人工审批」。
  */
 
 export const name = 'dsh-unattended'
 
 export const inject = ['approval', 'permissionPresets', 'sessionProjections']
+
+/** 无人值守开启时追加给模型的运行时事实（英文与宿主其它 context 一致）。 */
+const UNATTENDED_CONTEXT =
+  'Unattended mode is on: the Auto review reviewer still decides every call. A reviewer denial is final — no human approval will be requested. Do not repeat the exact denied call or request sandbox escalation; adapt the approach, or stop and report the blocker.'
 
 /**
  * 极小的 schema 垫片：本地 bundle 以 link 安装时 Node 从工作区 realpath 解析，
@@ -36,6 +44,10 @@ const enabledView = {
 
 export function apply(ctx) {
   const configured = () => ctx.approval.config.policy ?? 'ask'
+
+  /** 该会话是否处于无人值守（自动审查 + 审批策略 never）。 */
+  const unattendedOn = (session) => ctx.permissionPresets.current(session) === 'auto' &&
+    (ctx.approval.overrideOf(session) ?? configured()) === 'never'
 
   // 会话级状态：审批策略本身。`never` = 无人值守。
   ctx.sessionProjections.register({
@@ -71,6 +83,21 @@ export function apply(ctx) {
           ctx.approval.setPolicy(agent, 'ask')
         }
         return { kind: 'success', text: `unattended ${mode}` }
+      },
+    })
+  })
+
+  // 模型侧事实：只在无人值守生效时出现在 runtime context 里，紧跟在官方
+  // approval:policy 之后；关闭后该条目渲染为空，下一次快照自然取代旧文字。
+  ctx.inject(['systemPrompt'], (promptCtx) => {
+    const approvalOrder = promptCtx.systemPrompt.getContextOrder('APPROVAL_POLICY')
+    promptCtx.systemPrompt.context({
+      name: 'unattended:mode',
+      order: Number.isFinite(approvalOrder) ? approvalOrder + 0.5 : 115.5,
+      text: (context) => {
+        const agent = context.agent
+        if (agent === undefined || !unattendedOn(agent.session)) return ''
+        return UNATTENDED_CONTEXT
       },
     })
   })

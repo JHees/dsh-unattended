@@ -1,6 +1,6 @@
 {
   "name": "dsh-unattended",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Unattended mode for the DSH Auto review preset: reviewer denials become final with no human approval prompt, while allowed calls still run",
   "type": "module",
   "license": "MIT",
